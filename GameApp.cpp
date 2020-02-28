@@ -310,7 +310,7 @@ bool GameApp::InitResource()
 	// 初始化游戏对象
 	ComPtr<ID3D11ShaderResourceView> texture;
 	// 初始化车
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\WoodCrate.dds", nullptr, texture.GetAddressOf()));
+	HR(CreateWICTextureFromFile(m_pd3dDevice.Get(), L"Texture\\body.jpg", nullptr, texture.GetAddressOf()));
 
 
 	m_Body.SetBuffer(m_pd3dDevice.Get(), Geometry::CreateBox(6.0f, 1.0f, 6.0f));
@@ -339,9 +339,9 @@ bool GameApp::InitResource()
 	}
 
 	// 初始化地板
-	HR(CreateDDSTextureFromFile(m_pd3dDevice.Get(), L"Texture\\floor.dds", nullptr, texture.ReleaseAndGetAddressOf()));
+	HR(CreateWICTextureFromFile(m_pd3dDevice.Get(), L"Texture\\floor.jpg", nullptr, texture.ReleaseAndGetAddressOf()));
 	m_Floor.SetBuffer(m_pd3dDevice.Get(),
-		Geometry::CreatePlane(XMFLOAT2(200.0f, 200.0f), XMFLOAT2(5.0f, 5.0f)));
+		Geometry::CreatePlane(XMFLOAT2(200.0f, 200.0f), XMFLOAT2(10.0f, 10.0f)));
 	m_Floor.SetTexture(texture.Get());
 	m_Floor.SetWorldMatrix(XMMatrixTranslation(0.0f, -1.0f, 0.0f));
 	
