@@ -1,111 +1,179 @@
-////***************************************************************************************
-//// SkyRender.h by X_Jun(MKXJun) (C) 2018-2020 All Rights Reserved.
-//// Licensed under the MIT License.
-////
-//// Ìì¿ÕºĞ¼ÓÔØÓëäÖÈ¾Àà
-//// Skybox loader and render classes.
-////***************************************************************************************
-//
-//#ifndef SKYRENDER_H
-//#define SKYRENDER_H
-//
-//#include <vector>
-//#include <string>
-//#include "Camera.h"
-//#include <wrl/client.h>
-//
-//
-//class SkyRender
-//{
-//public:
-//	template<class T>
-//	using ComPtr = Microsoft::WRL::ComPtr<T>;
-//
-//	SkyRender() = default;
-//	~SkyRender() = default;
-//	// ²»ÔÊĞí¿½±´£¬ÔÊĞíÒÆ¶¯
-//	SkyRender(const SkyRender&) = delete;
-//	SkyRender& operator=(const SkyRender&) = delete;
-//	SkyRender(SkyRender&&) = default;
-//	SkyRender& operator=(SkyRender&&) = default;
-//
-//
-//	// ĞèÒªÌá¹©ÍêÕûµÄÌì¿ÕºĞÌùÍ¼ »òÕß ÒÑ¾­´´½¨ºÃµÄÌì¿ÕºĞÎÆÀí.ddsÎÄ¼ş
-//	HRESULT InitResource(ID3D11Device* device,
-//		ID3D11DeviceContext* deviceContext,
-//		const std::wstring& cubemapFilename,
-//		float skySphereRadius,		// Ìì¿ÕÇò°ë¾¶
-//		bool generateMips = false);	// Ä¬ÈÏ²»Îª¾²Ì¬Ìì¿ÕºĞÉú³Émipmaps
-//
-//	// ĞèÒªÌá¹©Ìì¿ÕºĞµÄÁùÕÅÕı·½ĞÎÌùÍ¼
-//	HRESULT InitResource(ID3D11Device* device,
-//		ID3D11DeviceContext* deviceContext,
-//		const std::vector<std::wstring>& cubemapFilenames,
-//		float skySphereRadius,		// Ìì¿ÕÇò°ë¾¶
-//		bool generateMips = false);	// Ä¬ÈÏ²»Îª¾²Ì¬Ìì¿ÕºĞÉú³Émipmaps
-//
-//	ID3D11ShaderResourceView* GetTextureCube();
-//
-//	void Draw(ID3D11DeviceContext* deviceContext, SkyEffect& skyEffect, const Camera& camera);
-//
-//	// ÉèÖÃµ÷ÊÔ¶ÔÏóÃû
-//	void SetDebugObjectName(const std::string& name);
-//
-//private:
-//	HRESULT InitResource(ID3D11Device* device, float skySphereRadius);
-//
-//
-//private:
-//	ComPtr<ID3D11Buffer> m_pVertexBuffer;
-//	ComPtr<ID3D11Buffer> m_pIndexBuffer;
-//
-//	UINT m_IndexCount = 0;
-//
-//	ComPtr<ID3D11ShaderResourceView> m_pTextureCubeSRV;
-//};
-//
-//class SkyEffect
-//{
-//public:
-//	SkyEffect();
-//	~SkyEffect();
-//
-//	SkyEffect(SkyEffect&& moveFrom) noexcept;
-//	SkyEffect& operator=(SkyEffect&& moveFrom) noexcept;
-//
-//	// »ñÈ¡µ¥Àı
-//	static SkyEffect& Get();
-//
-//	// ³õÊ¼»¯ËùĞè×ÊÔ´
-//	bool InitAll(ID3D11Device * device);
-//
-//	// 
-//	// äÖÈ¾Ä£Ê½µÄ±ä¸ü
-//	//
-//
-//	// Ä¬ÈÏ×´Ì¬À´»æÖÆ
-//	void SetRenderDefault(ID3D11DeviceContext * deviceContext);
-//
-//	//
-//	// ¾ØÕóÉèÖÃ
-//	//
-//
-//	void XM_CALLCONV SetWorldViewProjMatrix(DirectX::FXMMATRIX W, DirectX::CXMMATRIX V, DirectX::CXMMATRIX P);
-//	void XM_CALLCONV SetWorldViewProjMatrix(DirectX::FXMMATRIX WVP);
-//
-//	//
-//	// ÎÆÀíÁ¢·½ÌåÓ³ÉäÉèÖÃ
-//	//
-//
-//	void SetTextureCube(ID3D11ShaderResourceView * textureCube);
-//
-//
-//	// Ó¦ÓÃ³£Á¿»º³åÇøºÍÎÆÀí×ÊÔ´µÄ±ä¸ü
-//	void Apply(ID3D11DeviceContext * deviceContext);
-//
-//private:
-//	class Impl;
-//	std::unique_ptr<Impl> pImpl;
-//};
-//
-//#endif
+// å¤©ç©ºç›’åŠ è½½ä¸æ¸²æŸ“ç±»
+
+#ifndef SKYRENDER_H
+#define SKYRENDER_H
+
+#include <vector>
+#include <string>
+#include "Camera.h"
+#include <wrl/client.h>
+#include "RenderStates.h"
+#include "LightHelper.h"
+
+class BasicEffect
+{
+public:
+
+	enum RenderType { RenderObject, RenderInstance };
+
+	BasicEffect();
+	virtual ~BasicEffect();
+
+	BasicEffect(BasicEffect&& moveFrom) noexcept;
+	BasicEffect& operator=(BasicEffect&& moveFrom) noexcept;
+
+	// è·å–å•ä¾‹
+	static BasicEffect& Get();
+
+
+
+	// åˆå§‹åŒ–æ‰€éœ€èµ„æº
+	bool InitAll(ID3D11Device * device);
+
+
+	// 
+	// æ¸²æŸ“æ¨¡å¼çš„å˜æ›´
+	//
+
+	// é»˜è®¤çŠ¶æ€æ¥ç»˜åˆ¶
+	void SetRenderDefault(ID3D11DeviceContext * deviceContext, RenderType type);
+
+	//
+	// çŸ©é˜µè®¾ç½®
+	//
+
+	void XM_CALLCONV SetWorldMatrix(DirectX::FXMMATRIX W);
+	void XM_CALLCONV SetViewMatrix(DirectX::FXMMATRIX V);
+	void XM_CALLCONV SetProjMatrix(DirectX::FXMMATRIX P);
+
+	//
+	// å…‰ç…§ã€æè´¨å’Œçº¹ç†ç›¸å…³è®¾ç½®
+	//
+
+	// å„ç§ç±»å‹ç¯å…‰å…è®¸çš„æœ€å¤§æ•°ç›®
+	static const int maxLights = 5;
+
+	void SetDirLight(size_t pos, const DirectionalLight& dirLight);
+	void SetPointLight(size_t pos, const PointLight& pointLight);
+	void SetSpotLight(size_t pos, const SpotLight& spotLight);
+
+	void SetMaterial(const Material& material);
+
+
+	void SetTextureUsed(bool isUsed);
+
+	void SetTextureDiffuse(ID3D11ShaderResourceView * textureDiffuse);
+	void SetTextureCube(ID3D11ShaderResourceView * textureCube);
+
+	void XM_CALLCONV SetEyePos(DirectX::FXMVECTOR eyePos);
+
+	//
+	// çŠ¶æ€å¼€å…³è®¾ç½®
+	//
+
+	void SetReflectionEnabled(bool isEnable);
+
+
+	// åº”ç”¨å¸¸é‡ç¼“å†²åŒºå’Œçº¹ç†èµ„æºçš„å˜æ›´
+	void Apply(ID3D11DeviceContext * deviceContext);
+
+private:
+	class Impl;
+	std::unique_ptr<Impl> pImpl;
+};
+
+class SkyEffect
+{
+public:
+	SkyEffect();
+	~SkyEffect();
+
+	SkyEffect(SkyEffect&& moveFrom) noexcept;
+	SkyEffect& operator=(SkyEffect&& moveFrom) noexcept;
+
+	// è·å–å•ä¾‹
+	static SkyEffect& Get();
+
+	// åˆå§‹åŒ–æ‰€éœ€èµ„æº
+	bool InitAll(ID3D11Device * device);
+
+	// 
+	// æ¸²æŸ“æ¨¡å¼çš„å˜æ›´
+	//
+
+	// é»˜è®¤çŠ¶æ€æ¥ç»˜åˆ¶
+	void SetRenderDefault(ID3D11DeviceContext * deviceContext);
+
+	//
+	// çŸ©é˜µè®¾ç½®
+	//
+
+	void XM_CALLCONV SetWorldViewProjMatrix(DirectX::FXMMATRIX W, DirectX::CXMMATRIX V, DirectX::CXMMATRIX P);
+	void XM_CALLCONV SetWorldViewProjMatrix(DirectX::FXMMATRIX WVP);
+
+	//
+	// çº¹ç†ç«‹æ–¹ä½“æ˜ å°„è®¾ç½®
+	//
+
+	void SetTextureCube(ID3D11ShaderResourceView * textureCube);
+
+
+	// åº”ç”¨å¸¸é‡ç¼“å†²åŒºå’Œçº¹ç†èµ„æºçš„å˜æ›´
+	void Apply(ID3D11DeviceContext * deviceContext);
+
+private:
+	class Impl;
+	std::unique_ptr<Impl> pImpl;
+};
+
+
+class SkyRender
+{
+public:
+	template<class T>
+	using ComPtr = Microsoft::WRL::ComPtr<T>;
+
+	SkyRender() = default;
+	~SkyRender() = default;
+	// ä¸å…è®¸æ‹·è´ï¼Œå…è®¸ç§»åŠ¨
+	SkyRender(const SkyRender&) = delete;
+	SkyRender& operator=(const SkyRender&) = delete;
+	SkyRender(SkyRender&&) = default;
+	SkyRender& operator=(SkyRender&&) = default;
+
+
+	// éœ€è¦æä¾›å®Œæ•´çš„å¤©ç©ºç›’è´´å›¾ æˆ–è€… å·²ç»åˆ›å»ºå¥½çš„å¤©ç©ºç›’çº¹ç†.ddsæ–‡ä»¶
+	HRESULT InitResource(ID3D11Device* device,
+		ID3D11DeviceContext* deviceContext,
+		const std::wstring& cubemapFilename,
+		float skySphereRadius,		// å¤©ç©ºçƒåŠå¾„
+		bool generateMips = false);	// é»˜è®¤ä¸ä¸ºé™æ€å¤©ç©ºç›’ç”Ÿæˆmipmaps
+
+	// éœ€è¦æä¾›å¤©ç©ºç›’çš„å…­å¼ æ­£æ–¹å½¢è´´å›¾
+	HRESULT InitResource(ID3D11Device* device,
+		ID3D11DeviceContext* deviceContext,
+		const std::vector<std::wstring>& cubemapFilenames,
+		float skySphereRadius,		// å¤©ç©ºçƒåŠå¾„
+		bool generateMips = false);	// é»˜è®¤ä¸ä¸ºé™æ€å¤©ç©ºç›’ç”Ÿæˆmipmaps
+
+	ID3D11ShaderResourceView* GetTextureCube();
+
+	void Draw(ID3D11DeviceContext* deviceContext, SkyEffect& skyEffect, const Camera& camera);
+
+	// è®¾ç½®è°ƒè¯•å¯¹è±¡å
+	void SetDebugObjectName(const std::string& name);
+
+private:
+	HRESULT InitResource(ID3D11Device* device, float skySphereRadius);
+
+
+private:
+	ComPtr<ID3D11Buffer> m_pVertexBuffer;
+	ComPtr<ID3D11Buffer> m_pIndexBuffer;
+
+	UINT m_IndexCount = 0;
+
+	ComPtr<ID3D11ShaderResourceView> m_pTextureCubeSRV;
+};
+
+#endif

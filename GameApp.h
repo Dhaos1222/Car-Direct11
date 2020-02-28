@@ -5,7 +5,7 @@
 #include "Geometry.h"
 #include "LightHelper.h"
 #include "Camera.h"
-//#include "SkyRender.h"
+#include "SkyRender.h"
 
 class GameApp : public D3DApp
 {
@@ -70,6 +70,7 @@ public:
 		void Rotation(float rad);
 		// 绘制
 		void Draw(ID3D11DeviceContext * deviceContext);
+		void Draw(ID3D11DeviceContext * deviceContext, BasicEffect & effect);
 		// 设置物体类型
 		void SetObjectType(ObjectType type);
 		ObjectType GetObjectType();
@@ -81,7 +82,6 @@ public:
 		// 若缓冲区被重新设置，调试对象名也需要被重新设置
 		void SetDebugObjectName(const std::string& name);
 	private:
-		//std::unique_ptr<SkyRender> m_pSunset; // 天空盒
 
 		DirectX::XMFLOAT4X4 m_WorldMatrix;				    // 世界矩阵
 		DirectX::XMFLOAT4X4 m_ModelMatrix;					// 模型空间矩阵
@@ -91,10 +91,11 @@ public:
 		ComPtr<ID3D11Buffer> m_pIndexBuffer;				// 索引缓冲区
 		UINT m_VertexStride;								// 顶点字节大小
 		UINT m_IndexCount;								    // 索引数目	
-		float m_rotation;				//转向角度
+		Material material;
 
-		ObjectType o_type;
-		float moveFlag;
+		ObjectType o_type;		     // 对象类型
+		float m_rotation;				// 转向角度
+		float moveFlag;              // 移动状态
 	};
 
 	// 一个尽可能小的游戏对象控制类
@@ -113,7 +114,7 @@ public:
 		// 旋转(原地)
 		void Rotation(float rad);
 		// 绘制
-		void Draw(ID3D11DeviceContext * deviceContext);
+		void Draw(ID3D11DeviceContext * deviceContext, BasicEffect & effect);
 		// 添加子对象
 		void AddObj(GameObject &gameObject);
 		// 设置对象运动状态
@@ -139,7 +140,6 @@ public:
 	void DrawScene();
 
 private:
-	bool InitEffect();
 	bool InitResource();
 
 private:
@@ -172,6 +172,9 @@ private:
 	std::shared_ptr<Camera> m_pCamera;						    // 摄像机
 	CameraMode m_CameraMode;									// 摄像机模式
 
+	BasicEffect m_BasicEffect;								    // 对象渲染特效管理
+	SkyEffect m_SkyEffect;									    // 天空盒特效管理
+	std::unique_ptr<SkyRender> m_pSunset; // 天空盒
 };
 
 

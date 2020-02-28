@@ -1,10 +1,4 @@
-//***************************************************************************************
-// Geometry.h by X_Jun(MKXJun) (C) 2018-2020 All Rights Reserved.
-// Licensed under the MIT License.
-//
 // 生成常见的几何体网格模型
-// Generate common geometry meshes.
-//***************************************************************************************
 
 #ifndef GEOMETRY_H_
 #define GEOMETRY_H_
@@ -51,23 +45,7 @@ namespace Geometry
 	template<class VertexType = VertexPosNormalTex, class IndexType = DWORD>
 	MeshData<VertexType, IndexType> CreateCylinderNoCap(float radius = 1.0f, float height = 2.0f, UINT slices = 20,
 		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
-
-	// 创建圆锥体网格数据，slices越大，精度越高。
-	template<class VertexType = VertexPosNormalTex, class IndexType = DWORD>
-	MeshData<VertexType, IndexType> CreateCone(float radius = 1.0f, float height = 2.0f, UINT slices = 20,
-		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
-
-	// 创建只有圆锥体侧面网格数据，slices越大，精度越高。
-	template<class VertexType = VertexPosNormalTex, class IndexType = DWORD>
-	MeshData<VertexType, IndexType> CreateConeNoCap(float radius = 1.0f, float height = 2.0f, UINT slices = 20,
-		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
-
-	// 创建一个指定NDC屏幕区域的面(默认全屏)
-	template<class VertexType = VertexPosTex, class IndexType = DWORD>
-	MeshData<VertexType, IndexType> Create2DShow(const DirectX::XMFLOAT2& center, const DirectX::XMFLOAT2& scale, const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
-	template<class VertexType = VertexPosTex, class IndexType = DWORD>
-	MeshData<VertexType, IndexType> Create2DShow(float centerX = 0.0f, float centerY = 0.0f, float scaleX = 1.0f, float scaleY = 1.0f, const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
-
+	
 	// 创建一个平面
 	template<class VertexType = VertexPosNormalTex, class IndexType = DWORD>
 	MeshData<VertexType, IndexType> CreatePlane(const DirectX::XMFLOAT2& planeSize, 
@@ -75,25 +53,7 @@ namespace Geometry
 	template<class VertexType = VertexPosNormalTex, class IndexType = DWORD>
 	MeshData<VertexType, IndexType> CreatePlane(float width = 10.0f, float depth = 10.0f, float texU = 1.0f, float texV = 1.0f,
 		const DirectX::XMFLOAT4& color = { 1.0f, 1.0f, 1.0f, 1.0f });
-
-	// 创建一个地形
-	template<class VertexType = VertexPosNormalTex, class IndexType = DWORD>
-	MeshData<VertexType, IndexType> CreateTerrain(const DirectX::XMFLOAT2& terrainSize,
-		const DirectX::XMUINT2& slices = { 10, 10 }, const DirectX::XMFLOAT2 & maxTexCoord = { 1.0f, 1.0f },
-		const std::function<float(float, float)>& heightFunc = [](float x, float z) { return 0.0f; },
-		const std::function<DirectX::XMFLOAT3(float, float)>& normalFunc = [](float x, float z) { return XMFLOAT3(0.0f, 1.0f, 0.0f); },
-		const std::function<DirectX::XMFLOAT4(float, float)>& colorFunc = [](float x, float z) { return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f); });
-	template<class VertexType = VertexPosNormalTex, class IndexType = DWORD>
-	MeshData<VertexType, IndexType> CreateTerrain(float width = 10.0f, float depth = 10.0f,
-		UINT slicesX = 10, UINT slicesZ = 10, float texU = 1.0f, float texV = 1.0f,
-		const std::function<float(float, float)>& heightFunc = [](float x, float z) { return 0.0f; },
-		const std::function<DirectX::XMFLOAT3(float, float)>& normalFunc = [](float x, float z) { return XMFLOAT3(0.0f, 1.0f, 0.0f); },
-		const std::function<DirectX::XMFLOAT4(float, float)>& colorFunc = [](float x, float z) { return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f); });
 }
-
-
-
-
 
 namespace Geometry
 {
@@ -450,134 +410,6 @@ namespace Geometry
 	}
 
 	template<class VertexType, class IndexType>
-	MeshData<VertexType, IndexType> CreateCone(float radius, float height, UINT slices, const DirectX::XMFLOAT4& color)
-	{
-		using namespace DirectX;
-		auto meshData = CreateConeNoCap<VertexType, IndexType>(radius, height, slices, color);
-
-		UINT vertexCount = 3 * slices + 1;
-		UINT indexCount = 6 * slices;
-		meshData.vertexVec.resize(vertexCount);
-		meshData.indexVec.resize(indexCount);
-		
-		float h2 = height / 2;
-		float theta = 0.0f;
-		float per_theta = XM_2PI / slices;
-		UINT iIndex = 3 * slices;
-		UINT vIndex = 2 * slices;
-		Internal::VertexData vertexData;
-
-		// 放入圆锥底面顶点
-		for (UINT i = 0; i < slices; ++i)
-		{
-			theta = i * per_theta;
-			vertexData = { XMFLOAT3(radius * cosf(theta), -h2, radius * sinf(theta)), XMFLOAT3(0.0f, -1.0f, 0.0f),
-				XMFLOAT4(-1.0f, 0.0f, 0.0f, 1.0f), color, XMFLOAT2(cosf(theta) / 2 + 0.5f, sinf(theta) / 2 + 0.5f) };
-			Internal::InsertVertexElement(meshData.vertexVec[vIndex++], vertexData);
-		}
-		// 放入圆锥底面圆心
-		vertexData = { XMFLOAT3(0.0f, -h2, 0.0f), XMFLOAT3(0.0f, -1.0f, 0.0f),
-				XMFLOAT4(-1.0f, 0.0f, 0.0f, 1.0f), color, XMFLOAT2(0.5f, 0.5f) };
-		Internal::InsertVertexElement(meshData.vertexVec[vIndex++], vertexData);
-
-		// 放入索引
-		UINT offset = 2 * slices;
-		for (UINT i = 0; i < slices; ++i)
-		{
-			meshData.indexVec[iIndex++] = offset + slices;
-			meshData.indexVec[iIndex++] = offset + i % slices;
-			meshData.indexVec[iIndex++] = offset + (i + 1) % slices;
-		}
-
-		return meshData;
-	}
-
-	template<class VertexType, class IndexType>
-	MeshData<VertexType, IndexType> CreateConeNoCap(float radius, float height, UINT slices, const DirectX::XMFLOAT4& color)
-	{
-		using namespace DirectX;
-
-		MeshData<VertexType, IndexType> meshData;
-		UINT vertexCount = 2 * slices;
-		UINT indexCount = 3 * slices;
-		meshData.vertexVec.resize(vertexCount);
-		meshData.indexVec.resize(indexCount);
-
-		float h2 = height / 2;
-		float theta = 0.0f;
-		float per_theta = XM_2PI / slices;
-		float len = sqrtf(height * height + radius * radius);
-		UINT iIndex = 0;
-		UINT vIndex = 0;
-		Internal::VertexData vertexData;
-
-		// 放入圆锥尖端顶点(每个顶点位置相同，但包含不同的法向量和切线向量)
-		for (UINT i = 0; i < slices; ++i)
-		{
-			theta = i * per_theta + per_theta / 2;
-			vertexData = { XMFLOAT3(0.0f, h2, 0.0f), XMFLOAT3(radius * cosf(theta) / len, height / len, radius * sinf(theta) / len),
-				XMFLOAT4(-sinf(theta), 0.0f, cosf(theta), 1.0f), color, XMFLOAT2(0.5f, 0.5f) };
-			Internal::InsertVertexElement(meshData.vertexVec[vIndex++], vertexData);
-		}
-
-		// 放入圆锥侧面底部顶点
-		for (UINT i = 0; i < slices; ++i)
-		{
-			theta = i * per_theta;
-			vertexData = { XMFLOAT3(radius * cosf(theta), -h2, radius * sinf(theta)), XMFLOAT3(radius * cosf(theta) / len, height / len, radius * sinf(theta) / len),
-				XMFLOAT4(-sinf(theta), 0.0f, cosf(theta), 1.0f), color, XMFLOAT2(cosf(theta) / 2 + 0.5f, sinf(theta) / 2 + 0.5f) };
-			Internal::InsertVertexElement(meshData.vertexVec[vIndex++], vertexData);
-		}
-
-		// 放入索引
-		for (UINT i = 0; i < slices; ++i)
-		{
-			meshData.indexVec[iIndex++] = i;
-			meshData.indexVec[iIndex++] = slices + (i + 1) % slices;
-			meshData.indexVec[iIndex++] = slices + i % slices;
-		}
-
-		return meshData;
-	}
-
-	template<class VertexType, class IndexType>
-	inline MeshData<VertexType, IndexType> Create2DShow(const DirectX::XMFLOAT2& center, const DirectX::XMFLOAT2 & scale, const DirectX::XMFLOAT4 & color)
-	{
-		return Create2DShow<VertexType, IndexType>(center.x, center.y, scale.x, scale.y, color);
-	}
-
-	template<class VertexType, class IndexType>
-	inline MeshData<VertexType, IndexType> Create2DShow(float centerX, float centerY, float scaleX, float scaleY, const DirectX::XMFLOAT4 & color)
-	{
-		using namespace DirectX;
-
-		MeshData<VertexType, IndexType> meshData;
-		meshData.vertexVec.resize(4);
-
-		Internal::VertexData vertexData;
-		UINT vIndex = 0;
-
-		vertexData = { XMFLOAT3(centerX - scaleX, centerY - scaleY, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f),
-			XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), color, XMFLOAT2(0.0f, 1.0f) };
-		Internal::InsertVertexElement(meshData.vertexVec[vIndex++], vertexData);
-
-		vertexData = { XMFLOAT3(centerX - scaleX, centerY + scaleY, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f),
-			XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), color, XMFLOAT2(0.0f, 0.0f) };
-		Internal::InsertVertexElement(meshData.vertexVec[vIndex++], vertexData);
-
-		vertexData = { XMFLOAT3(centerX + scaleX, centerY + scaleY, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f),
-			XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), color, XMFLOAT2(1.0f, 0.0f) };
-		Internal::InsertVertexElement(meshData.vertexVec[vIndex++], vertexData);
-
-		vertexData = { XMFLOAT3(centerX + scaleX, centerY - scaleY, 0.0f), XMFLOAT3(0.0f, 0.0f, -1.0f),
-			XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), color, XMFLOAT2(1.0f, 1.0f) };
-		Internal::InsertVertexElement(meshData.vertexVec[vIndex++], vertexData);
-
-		meshData.indexVec = { 0, 1, 2, 2, 3, 0 };
-		return meshData;
-	}
-
-	template<class VertexType, class IndexType>
 	inline MeshData<VertexType, IndexType> CreatePlane(const DirectX::XMFLOAT2 & planeSize,
 		const DirectX::XMFLOAT2 & maxTexCoord, const DirectX::XMFLOAT4 & color)
 	{
@@ -624,79 +456,7 @@ namespace Geometry
 			maxTexCoord.x, maxTexCoord.y, heightFunc, normalFunc, colorFunc);
 	}
 
-	template<class VertexType, class IndexType>
-	MeshData<VertexType, IndexType> CreateTerrain(float width, float depth, UINT slicesX, UINT slicesZ,
-		float texU, float texV, const std::function<float(float, float)>& heightFunc,
-		const std::function<DirectX::XMFLOAT3(float, float)>& normalFunc,
-		const std::function<DirectX::XMFLOAT4(float, float)>& colorFunc)
-	{
-		using namespace DirectX;
-
-		MeshData<VertexType, IndexType> meshData;
-		UINT vertexCount = (slicesX + 1) * (slicesZ + 1);
-		UINT indexCount = 6 * slicesX * slicesZ;
-		meshData.vertexVec.resize(vertexCount);
-		meshData.indexVec.resize(indexCount);
-
-		Internal::VertexData vertexData;
-		UINT vIndex = 0;
-		UINT iIndex = 0;
-
-		float sliceWidth = width / slicesX;
-		float sliceDepth = depth / slicesZ;
-		float leftBottomX = -width / 2;
-		float leftBottomZ = -depth / 2;
-		float posX, posZ;
-		float sliceTexWidth = texU / slicesX;
-		float sliceTexDepth = texV / slicesZ;
-
-		XMFLOAT3 normal;
-		XMFLOAT4 tangent;
-		// 创建网格顶点
-		//  __ __
-		// | /| /|
-		// |/_|/_|
-		// | /| /| 
-		// |/_|/_|
-		for (UINT z = 0; z <= slicesZ; ++z)
-		{
-			posZ = leftBottomZ + z * sliceDepth;
-			for (UINT x = 0; x <= slicesX; ++x)
-			{
-				posX = leftBottomX + x * sliceWidth;
-				// 计算法向量并归一化
-				normal = normalFunc(posX, posZ);
-				XMStoreFloat3(&normal, XMVector3Normalize(XMLoadFloat3(&normal)));
-				// 计算法平面与z=posZ平面构成的直线单位切向量，维持w分量为1.0f
-				XMStoreFloat4(&tangent, XMVector3Normalize(XMVectorSet(normal.y, -normal.x, 0.0f, 0.0f)) + g_XMIdentityR3);
-
-				vertexData = { XMFLOAT3(posX, heightFunc(posX, posZ), posZ),
-					normal, tangent, colorFunc(posX, posZ), XMFLOAT2(x * sliceTexWidth, texV - z * sliceTexDepth) };
-				Internal::InsertVertexElement(meshData.vertexVec[vIndex++], vertexData);
-			}
-		}
-		// 放入索引
-		for (UINT i = 0; i < slicesZ; ++i)
-		{
-			for (UINT j = 0; j < slicesX; ++j)
-			{
-				meshData.indexVec[iIndex++] = i * (slicesX + 1) + j;
-				meshData.indexVec[iIndex++] = (i + 1) * (slicesX + 1) + j;
-				meshData.indexVec[iIndex++] = (i + 1) * (slicesX + 1) + j + 1;
-
-				meshData.indexVec[iIndex++] = (i + 1) * (slicesX + 1) + j + 1;
-				meshData.indexVec[iIndex++] = i * (slicesX + 1) + j + 1;
-				meshData.indexVec[iIndex++] = i * (slicesX + 1) + j;
-			}
-		}
-
-		return meshData;
-	}
-
-
 }
-
-
 
 #endif
 

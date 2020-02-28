@@ -16,7 +16,7 @@
     <Filter Include="着色器">
       <UniqueIdentifier>{2afd2fc0-b15f-4b56-b011-620c2a2a18cb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="通用文件">
+    <Filter Include="支持库">
       <UniqueIdentifier>{4ee3043a-c971-47de-8699-4a584e268a40}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -46,21 +46,24 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DDSTextureLoader.h">
-      <Filter>通用文件</Filter>
+      <Filter>支持库</Filter>
     </ClInclude>
     <ClInclude Include="Keyboard.h">
-      <Filter>通用文件</Filter>
+      <Filter>支持库</Filter>
     </ClInclude>
     <ClInclude Include="Mouse.h">
-      <Filter>通用文件</Filter>
+      <Filter>支持库</Filter>
     </ClInclude>
     <ClInclude Include="WICTextureLoader.h">
-      <Filter>通用文件</Filter>
+      <Filter>支持库</Filter>
     </ClInclude>
     <ClInclude Include="DXTrace.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="SkyRender.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderStates.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -87,21 +90,24 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DDSTextureLoader.cpp">
-      <Filter>通用文件</Filter>
+      <Filter>支持库</Filter>
     </ClCompile>
     <ClCompile Include="Keyboard.cpp">
-      <Filter>通用文件</Filter>
+      <Filter>支持库</Filter>
     </ClCompile>
     <ClCompile Include="Mouse.cpp">
-      <Filter>通用文件</Filter>
+      <Filter>支持库</Filter>
     </ClCompile>
     <ClCompile Include="WICTextureLoader.cpp">
-      <Filter>通用文件</Filter>
+      <Filter>支持库</Filter>
     </ClCompile>
     <ClCompile Include="DXTrace.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="SkyRender.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderStates.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
